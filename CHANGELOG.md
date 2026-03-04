@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 2 includes explicit reminder to add source files to /documents/source
 - Conversion script uses subprocess to call markitdown CLI (not Python module)
 - Conversion script installs `markitdown[all]` before attempting conversions
+- Added folder verification step before conversion in Phase 3
+- Added repository boundary enforcement to prevent files outside root
+- Moved Copilot Bootstrap Prompt to top of WORKFLOW.md for quick access
 
 ### Removed
 - (none)
