@@ -470,11 +470,13 @@ After Phase 1 approval, inform the user:
 Wait for the user to confirm they have placed files and are ready.
 
 ## PHASE 3: TEMPLATE CREATION
-After Phase 2 confirmation, copy all template files from /documents/templates to their respective artifact directories:
-- documents/templates/requirements/*.md -> artifacts/requirements/
-- documents/templates/architecture/*.md -> artifacts/architecture/
-- documents/templates/diagrams/*.md -> artifacts/diagrams/
-- documents/templates/adr/*.md -> artifacts/adr/
+After Phase 2 confirmation, generate and create the template files from the definitions in WORKFLOW.md into the artifact directories:
+- Create /artifacts/requirements/ directory and add: business-context.md, stakeholder-needs.md, functional-requirements.md, non-functional-requirements.md, traceability-matrix.md
+- Create /artifacts/architecture/ directory and add: current-state.md, future-state.md, gap-analysis.md, roadmap.md
+- Create /artifacts/diagrams/ directory and add: context-diagram.md, container-diagram.md, component-diagram.md, code-diagram.md
+- Create /artifacts/adr/ directory and add: adr-template.md
+
+Use the template definitions from the WORKFLOW.md Template Files section. Do NOT assume these files already exist - generate them fresh from the specifications.
 
 Show the user the populated templates and ask: "Should I proceed with document conversion?"
 
