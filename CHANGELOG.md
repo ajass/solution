@@ -8,13 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Template files in /documents/templates/ (requirements, architecture, diagrams, ADR)
-- README.md with project overview and governance rules
-- CHANGELOG.md
-- .gitignore for Python/IDE/OS
+- Phase 5: Content-driven mapping (analyzes actual content, not filenames)
+- `/artifacts/discovered/` folder for unmapped content
+- `unmapped-content.md` template for tracking unmatched content
+- Content Mapping Strategy section in WORKFLOW.md
+- Completeness report now tracks discovered/unmapped items
 
 ### Changed
-- (none)
+- Phase 3 creates discovered/ folder and unmapped-content.md template
+- Folder structure in WORKFLOW.md and README.md updated
 
 ### Removed
 - (none)
@@ -22,4 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [v0.1.0] - YYYY-MM-DD
 
 ### Added
-- Initial release
+- Initial release with 7-phase workflow
+- Template files (requirements, architecture, diagrams, ADR)
+- README.md and CHANGELOG.md
+- .gitignore
