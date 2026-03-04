@@ -8,10 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial project structure with WORKFLOW.md
-- Template files for requirements, architecture, diagrams, and ADR
+- Template files in /documents/templates/ (requirements, architecture, diagrams, ADR)
 - README.md with project overview and governance rules
-- This CHANGELOG.md
+- CHANGELOG.md
+- .gitignore for Python/IDE/OS
 
 ### Changed
 - (none)
