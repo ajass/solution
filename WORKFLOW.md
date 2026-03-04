@@ -53,7 +53,8 @@ This workflow defines the process for a Solution Architect to:
 │   ├── requirements/
 │   ├── architecture/
 │   ├── diagrams/
-│   └── adr/
+│   ├── adr/
+│   └── discovered/      (unmapped content from Phase 5)
 ├── documents/
 │   ├── source/
 │   ├── processed/
@@ -432,6 +433,31 @@ What becomes easier or more difficult to do because of this change?
 -
 ```
 
+### Discovered Content Template
+
+**`templates/unmapped-content.md`**
+```yaml
+---
+title: Discovered Content
+version: 0.1.0
+author: 
+date: 
+status: draft
+---
+# Discovered Content
+
+This file contains content that was converted but did not fit into any predefined template. Review and categorize as needed.
+
+## Unmapped Items
+
+| Filename | Source File | Content Summary | Suggested Template | Manual Action Required |
+|----------|-------------|-----------------|-------------------|----------------------|
+| | | | | |
+
+## Notes
+- 
+```
+
 ---
 
 ## Copilot Bootstrap Prompt
@@ -450,7 +476,8 @@ Review the required folder structure:
 │   ├── requirements/
 │   ├── architecture/
 │   ├── diagrams/
-│   └── adr/
+│   ├── adr/
+│   └── discovered/
 ├── documents/
 │   ├── source/
 │   ├── processed/
@@ -472,9 +499,10 @@ Wait for the user to confirm they have placed files and are ready.
 ## PHASE 3: TEMPLATE CREATION
 After Phase 2 confirmation, generate and create the template files from the definitions in WORKFLOW.md into the artifact directories:
 - Create /artifacts/requirements/ directory and add: business-context.md, stakeholder-needs.md, functional-requirements.md, non-functional-requirements.md, traceability-matrix.md
-- Create /artifacts/architecture/ directory and add: current-state.md, future-state.md, gap-analysis.md, roadmap.md
+- Create /artifacts/architecture/ directory and add: current-state.md, future-state.md, gap-analysis.md, roadmap.md, unmapped-content.md
 - Create /artifacts/diagrams/ directory and add: context-diagram.md, container-diagram.md, component-diagram.md, code-diagram.md
 - Create /artifacts/adr/ directory and add: adr-template.md
+- Create /artifacts/discovered/ directory (empty, for unmatched content during Phase 5)
 
 Use the template definitions from the WORKFLOW.md Template Files section. Do NOT assume these files already exist - generate them fresh from the specifications.
 
@@ -505,24 +533,35 @@ After Phase 3 approval:
 
 ## PHASE 5: CONTENT MAPPING & COMPLETENESS ANALYSIS
 After Phase 4 completion:
-1. Read each converted document from /documents/processed/
-2. Analyze filenames to determine content mapping:
-   - meeting*, transcript*, notes* -> stakeholder-needs.md
-   - requirements*, specs* -> functional-requirements.md
-   - nfr*, non-functional* -> non-functional-requirements.md
-   - decision*, adr* -> adr/adr-template.md (rename appropriately)
-   - screenshot*, image* -> diagrams/
-   - current*, existing* -> current-state.md
-   - future*, target* -> future-state.md
-   - roadmap*, timeline* -> roadmap.md
-   - gap* -> gap-analysis.md
-3. Populate the appropriate templates with extracted content
-4. Generate a completeness-report.md in /artifacts/architecture/ analyzing:
-   - Which templates have content
+1. Create /artifacts/discovered/ directory for content that doesn't fit predefined templates
+2. Read each converted document from /documents/processed/
+3. Analyze the ACTUAL CONTENT of each document (not just filename) to determine relevance:
+   - Read the full content and identify what type of information it contains
+   - A single document may contain data for multiple templates
+   - Example: "kickoff-meeting.docx" might have business goals, stakeholder input, AND requirements
+4. Populate templates by extracting relevant sections:
+   - Business goals, scope, constraints → business-context.md
+   - Stakeholder input, roles, needs → stakeholder-needs.md
+   - Functional requirements, features → functional-requirements.md
+   - Non-functional requirements (performance, security, etc.) → non-functional-requirements.md
+   - Requirement-stakeholder links → traceability-matrix.md
+   - Current systems, integrations, pain points → current-state.md
+   - Future vision, target architecture → future-state.md
+   - Gaps, gaps identified → gap-analysis.md
+   - Phases, timeline → roadmap.md
+   - Architecture decisions → adr/*.md
+   - Diagrams, screenshots → diagrams/*.md
+5. For content that doesn't fit any template:
+   - Copy the document to /artifacts/discovered/
+   - Note in unmapped-content.md with suggested review action
+6. Populate unmapped-content.md template with all unmatched content
+7. Generate completeness-report.md in /artifacts/architecture/ analyzing:
+   - Which templates have content (from content analysis, not just filename)
    - Which templates are empty or missing sections
+   - List of unmapped/discovered content requiring manual review
    - Suggested next steps to complete the portfolio
-5. Display the completeness report to the user
-6. Ask: "I have analyzed template completeness. The report shows [summary]. Would you like to add more source files to address gaps? Say 'yes' to add more files or 'no' to proceed."
+8. Display the completeness report to the user
+9. Ask: "I have analyzed template completeness. The report shows [summary]. Would you like to add more source files to address gaps? Say 'yes' to add more files or 'no' to proceed."
 
 ## PHASE 5 LOOP
 If user says "yes":
@@ -571,27 +610,43 @@ After Phase 6 approval:
 
 ## Content Mapping Strategy
 
-### Filename-Based Heuristics
+### Content-Driven Analysis
 
-| Filename Pattern | Target Template |
-|-----------------|-----------------|
-| `meeting*`, `transcript*`, `notes*` | `artifacts/requirements/stakeholder-needs.md` |
-| `requirement*`, `spec*`, `feature*` | `artifacts/requirements/functional-requirements.md` |
-| `nfr*`, `non-functional*`, `performance*`, `security*` | `artifacts/requirements/non-functional-requirements.md` |
-| `decision*`, `adr*` | `artifacts/adr/<descriptive-name>.md` |
-| `screenshot*`, `image*`, `diagram*` | `artifacts/diagrams/` |
-| `current*`, `existing*`, `as-is*` | `artifacts/architecture/current-state.md` |
-| `future*`, `target*`, `to-be*` | `artifacts/architecture/future-state.md` |
-| `roadmap*`, `timeline*`, `plan*` | `artifacts/architecture/roadmap.md` |
-| `gap*`, `analysis*` | `artifacts/architecture/gap-analysis.md` |
-| `context*`, `overview*` | `artifacts/requirements/business-context.md` |
-| `trace*`, `matrix*` | `artifacts/requirements/traceability-matrix.md` |
+Mapping is determined by **analyzing actual document content**, not filenames. A single document may contribute to multiple templates.
 
-### Mapping Priority
+### Content Types to Extract
 
-1. Exact matches take priority (case-insensitive)
-2. Partial matches are considered secondary
-3. Unmatched files remain in `/documents/processed/` for manual review
+| Content Type | Target Template |
+|--------------|-----------------|
+| Business goals, scope, constraints | `artifacts/requirements/business-context.md` |
+| Stakeholder names, roles, needs, pain points | `artifacts/requirements/stakeholder-needs.md` |
+| Functional requirements, features, user stories | `artifacts/requirements/functional-requirements.md` |
+| Performance, security, scalability, availability requirements | `artifacts/requirements/non-functional-requirements.md` |
+| Requirement-stakeholder links | `artifacts/requirements/traceability-matrix.md` |
+| Current systems, integrations, technical debt | `artifacts/architecture/current-state.md` |
+| Future vision, target architecture | `artifacts/architecture/future-state.md` |
+| Gaps identified between current and future state | `artifacts/architecture/gap-analysis.md` |
+| Implementation phases, timeline | `artifacts/architecture/roadmap.md` |
+| Architecture decisions with context, decision, consequences | `artifacts/adr/<descriptive-name>.md` |
+| Diagram descriptions, Mermaid code | `artifacts/diagrams/*.md` |
+
+### Unmatched Content Handling
+
+1. Content that doesn't fit any predefined template → copy to `/artifacts/discovered/`
+2. Document in `/artifacts/architecture/unmapped-content   - Filename.md` with:
+
+   - Source location
+   - Content summary
+   - Suggested template (if applicable)
+   - Manual action required flag
+
+### Mapping Principles
+
+1. Read full content of each converted document
+2. Extract relevant sections to appropriate templates (one document can map to multiple templates)
+3. Track source file for traceability
+4. Preserve unmatched content in discovered folder
+5. Document all unmapped items for manual review
 
 ---
 
@@ -615,24 +670,32 @@ status: draft
 - **Populated:** X
 - **Empty/Incomplete:** X
 - **Completion Rate:** X%
+- **Unmapped/Discovered Items:** X
 
 ## Template Status
 
-| Template | Status | Content Found | Next Steps |
-|----------|--------|---------------|------------|
-| business-context.md | Complete/Empty/Partial | | |
-| stakeholder-needs.md | Complete/Empty/Partial | | |
-| functional-requirements.md | Complete/Empty/Partial | | |
-| non-functional-requirements.md | Complete/Empty/Partial | | |
-| traceability-matrix.md | Complete/Empty/Partial | | |
-| current-state.md | Complete/Empty/Partial | | |
-| future-state.md | Complete/Empty/Partial | | |
-| gap-analysis.md | Complete/Empty/Partial | | |
-| roadmap.md | Complete/Empty/Partial | | |
-| context-diagram.md | Complete/Empty/Partial | | |
-| container-diagram.md | Complete/Empty/Partial | | |
-| component-diagram.md | Complete/Empty/Partial | | |
-| adr/*.md | Complete/Empty/Partial | | |
+| Template | Status | Content Found | Source Files | Next Steps |
+|----------|--------|---------------|--------------|------------|
+| business-context.md | Complete/Empty/Partial | | | |
+| stakeholder-needs.md | Complete/Empty/Partial | | | |
+| functional-requirements.md | Complete/Empty/Partial | | | |
+| non-functional-requirements.md | Complete/Empty/Partial | | | |
+| traceability-matrix.md | Complete/Empty/Partial | | | |
+| current-state.md | Complete/Empty/Partial | | | |
+| future-state.md | Complete/Empty/Partial | | | |
+| gap-analysis.md | Complete/Empty/Partial | | | |
+| roadmap.md | Complete/Empty/Partial | | | |
+| unmapped-content.md | Populated/Empty | | | |
+| context-diagram.md | Complete/Empty/Partial | | | |
+| container-diagram.md | Complete/Empty/Partial | | | |
+| component-diagram.md | Complete/Empty/Partial | | | |
+| adr/*.md | Complete/Empty/Partial | | | |
+
+## Discovered Content (Unmapped)
+
+| Filename | Location | Summary | Manual Review Needed |
+|----------|----------|---------|---------------------|
+| | /artifacts/discovered/ | | Yes/No |
 
 ## Recommendations
 

@@ -19,7 +19,8 @@ This project provides a structured workflow for Solution Architects to:
 │   ├── requirements/
 │   ├── architecture/
 │   ├── diagrams/
-│   └── adr/
+│   ├── adr/
+│   └── discovered/      (unmapped content from Phase 5)
 ├── documents/
 │   ├── source/           (place source documents here)
 │   ├── processed/         (converted markdown output)
