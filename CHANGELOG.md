@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added folder verification step before conversion in Phase 3
 - Added repository boundary enforcement to prevent files outside root
 - Moved Copilot Bootstrap Prompt to top of WORKFLOW.md for quick access
+- Added dynamic repo root discovery in Phase 1 (finds workflow.md to determine root)
+- Added dynamic repo root discovery in Phase 3 (ensures all paths relative to discovered root)
 
 ### Removed
 - (none)

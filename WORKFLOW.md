@@ -30,8 +30,13 @@ Review the required folder structure:
 
 Propose this structure to the user. Ask: "Does this file structure work for your project? Should I proceed with scaffolding?"
 
-After user approval, CREATE all directories immediately using PowerShell:
-- New-Item -ItemType Directory -Force -Path artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered, documents/source, documents/processed, documents/templates, scripts
+After user approval, DISCOVER repo root and CREATE all directories:
+1. Find workflow.md location to determine repo root:
+   $root = (Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName
+   If not found in current directory or subdirectories, ask user to run from project root.
+2. Create all directories relative to discovered root:
+   New-Item -ItemType Directory -Force -Path "$root/artifacts/requirements", "$root/artifacts/architecture", "$root/artifacts/diagrams", "$root/artifacts/adr", "$root/artifacts/discovered", "$root/documents/source", "$root/documents/processed", "$root/documents/templates", "$root/scripts"
+3. Verify workflow.md still exists in the root
 
 Confirm the folders were created and ask: "Ready to proceed to Phase 2?"
 
@@ -45,18 +50,22 @@ Wait for the user to confirm they have placed files and are ready.
 
 ## PHASE 3: DOCUMENT CONVERSION
 After Phase 2 confirmation:
-1. Verify all required folders exist before proceeding:
+1. DISCOVER repo root:
+   - Find workflow.md starting from current directory (walk up if not found)
+   - Use parent directory of workflow.md as repo root
+   - If not found, abort and ask user to run from project root
+2. Verify all required folders exist before proceeding (relative to discovered root):
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
    - documents/source, documents/processed, documents/templates
    - scripts
    If any folder is missing, create it and warn the user.
-2. Ensure virtual environment is set up:
+3. Ensure virtual environment is set up:
    cd scripts
    python -m venv venv
    .\venv\Scripts\Activate.ps1
-3. Install dependencies:
+4. Install dependencies:
    .\venv\Scripts\pip.exe install "markitdown[all]"
-4. Generate the Python conversion script `scripts/convert_artifacts.py` with these requirements:
+5. Generate the Python conversion script `scripts/convert_artifacts.py` with these requirements:
    - Use pathlib for relative paths from repo root
    - Resolve repo root dynamically (directory containing workflow.md)
    - Use subprocess to call markitdown CLI: subprocess.run(['markitdown', str(input_file), '-o', str(output_file)])
@@ -67,11 +76,11 @@ After Phase 2 confirmation:
    - Convert all supported formats (docx, pptx, xlsx, pdf, images, markdown)
    - Generate error_log.md for any failures
    - Run without admin privileges
-5. Show the generated script to the user for approval
-6. Run the converter:
+6. Show the generated script to the user for approval
+7. Run the converter:
    .\venv\Scripts\python.exe convert_artifacts.py
-7. Display the results showing converted files and any errors
-8. If errors exist, show the error log and ask: "Some files failed to convert. Should I continue with mapping or address the errors first?"
+8. Display the results showing converted files and any errors
+9. If errors exist, show the error log and ask: "Some files failed to convert. Should I continue with mapping or address the errors first?"
 
 ## PHASE 4: TEMPLATE CREATION
 After Phase 3 completion:
