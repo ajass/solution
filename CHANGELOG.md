@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3 creates discovered/ folder and unmapped-content.md template
 - Folder structure in WORKFLOW.md and README.md updated
 
+### Fixed
+- Workflow phase ordering: Convert documents first, then create templates
+- Phase 1 now scaffolds folder structure after user approval
+- Phase 2 includes explicit reminder to add source files to /documents/source
+- Conversion script uses subprocess to call markitdown CLI (not Python module)
+- Conversion script installs `markitdown[all]` before attempting conversions
+
 ### Removed
 - (none)
 

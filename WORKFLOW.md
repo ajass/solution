@@ -90,18 +90,14 @@ python -m venv venv
 ### Run Document Converter
 
 ```powershell
+.\venv\Scripts\pip.exe install "markitdown[all]"
 .\venv\Scripts\python.exe convert_artifacts.py
 ```
 
-### Deactivate Virtual Environment
-
-```powershell
-deactivate
-```
-
-**Note:** The `scripts/convert_artifacts.py` script is generated dynamically by Copilot during Phase 4 of the workflow. The script will:
-- Use pathlib for relative paths
-- Auto-install markitdown if not present
+**Note:** The `scripts/convert_artifacts.py` script is generated dynamically by Copilot during Phase 3 of the workflow. The script will:
+- Use pathlib for relative paths from repo root
+- Use subprocess to call markitdown CLI: `subprocess.run(['markitdown', str(input_file), '-o', str(output_file)])`
+- Install `markitdown[all]` BEFORE attempting any conversions
 - Walk `/documents/source` recursively
 - Preserve folder structure in `/documents/processed`
 - Generate `error_log.md` for any conversion failures
@@ -490,14 +486,46 @@ Review the required folder structure:
 
 Propose this structure to the user. Ask: "Does this file structure work for your project? Should I proceed with scaffolding?"
 
+After user approval, CREATE all directories immediately using PowerShell:
+- New-Item -ItemType Directory -Force -Path artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered, documents/source, documents/processed, documents/templates, scripts
+
+Confirm the folders were created and ask: "Ready to proceed to Phase 2?"
+
 ## PHASE 2: SOURCE FILE COLLECTION
 After Phase 1 approval, inform the user:
-"Place all source documents (meeting notes, transcripts, screenshots, pptx, docx, excel, pdf, etc.) in /documents/source. When ready, confirm by saying 'I'm ready to convert' and I will proceed."
+"IMPORTANT: Place all source documents (meeting notes, transcripts, screenshots, pptx, docx, excel, pdf, images, markdown, etc.) in /documents/source. The folder structure has already been created.
+
+When ready, confirm by saying 'I'm ready to convert' and I will proceed."
 
 Wait for the user to confirm they have placed files and are ready.
 
-## PHASE 3: TEMPLATE CREATION
-After Phase 2 confirmation, generate and create the template files from the definitions in WORKFLOW.md into the artifact directories:
+## PHASE 3: DOCUMENT CONVERSION
+After Phase 2 confirmation:
+1. Ensure virtual environment is set up:
+   cd scripts
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+2. Install dependencies:
+   .\venv\Scripts\pip.exe install "markitdown[all]"
+3. Generate the Python conversion script `scripts/convert_artifacts.py` with these requirements:
+   - Use pathlib for relative paths from repo root
+   - Create virtual environment in /scripts/venv (already done above)
+   - Use subprocess to call markitdown CLI: subprocess.run(['markitdown', str(input_file), '-o', str(output_file)])
+   - Install markitdown[all] BEFORE attempting any conversions
+   - Walk /documents/source recursively
+   - Preserve folder structure in /documents/processed
+   - Convert all supported formats (docx, pptx, xlsx, pdf, images, markdown)
+   - Generate error_log.md for any failures
+   - Run without admin privileges
+4. Show the generated script to the user for approval
+5. Run the converter:
+   .\venv\Scripts\python.exe convert_artifacts.py
+6. Display the results showing converted files and any errors
+7. If errors exist, show the error log and ask: "Some files failed to convert. Should I continue with mapping or address the errors first?"
+
+## PHASE 4: TEMPLATE CREATION
+After Phase 3 completion:
+Generate and create the template files from the definitions in WORKFLOW.md into the artifact directories:
 - Create /artifacts/requirements/ directory and add: business-context.md, stakeholder-needs.md, functional-requirements.md, non-functional-requirements.md, traceability-matrix.md
 - Create /artifacts/architecture/ directory and add: current-state.md, future-state.md, gap-analysis.md, roadmap.md, unmapped-content.md
 - Create /artifacts/diagrams/ directory and add: context-diagram.md, container-diagram.md, component-diagram.md, code-diagram.md
@@ -506,30 +534,9 @@ After Phase 2 confirmation, generate and create the template files from the defi
 
 Use the template definitions from the WORKFLOW.md Template Files section. Do NOT assume these files already exist - generate them fresh from the specifications.
 
-Show the user the populated templates and ask: "Should I proceed with document conversion?"
+Note: Templates are created AFTER conversion so AI can analyze actual document content first. All templates will be created even if no relevant content is found in the converted files.
 
-## PHASE 4: DOCUMENT CONVERSION
-After Phase 3 approval:
-1. Generate the Python conversion script `scripts/convert_artifacts.py` with these requirements:
-   - Use pathlib for relative paths from repo root
-   - Create virtual environment in /scripts/venv
-   - Auto-install markitdown if not present
-   - Walk /documents/source recursively
-   - Preserve folder structure in /documents/processed
-   - Convert all supported formats (docx, pptx, xlsx, pdf, images, markdown)
-   - Generate error_log.md for any failures
-   - Run without admin privileges
-2. Show the generated script to the user for approval
-3. Create and activate the virtual environment:
-   cd scripts
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-4. Install dependencies:
-   .\venv\Scripts\pip.exe install markitdown
-5. Run the converter:
-   .\venv\Scripts\python.exe convert_artifacts.py
-6. Display the results showing converted files and any errors
-7. If errors exist, show the error log and ask: "Some files failed to convert. Should I continue with mapping or address the errors first?"
+Show the user the templates and ask: "Should I proceed with content mapping?"
 
 ## PHASE 5: CONTENT MAPPING & COMPLETENESS ANALYSIS
 After Phase 4 completion:
