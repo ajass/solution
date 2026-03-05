@@ -55,15 +55,24 @@ After Phase 2 confirmation:
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
    - documents/source, documents/processed
    - scripts
-4. Set up Python with venv:
+4. **SET UP VENV** (copy and run these commands):
+   ```powershell
    cd scripts
    python -m venv venv
    .\venv\Scripts\Activate.ps1
-5. Install markitdown in venv:
    .\venv\Scripts\pip.exe install "markitdown[all]"
+   ```
+5. **TEST THE SETUP** (copy and run):
+   ```powershell
+   .\venv\Scripts\python.exe -m markitdown --version
+   ```
+   - If this fails, report: "markitdown installation failed. Try: .\venv\Scripts\pip.exe install markitdown[all]"
+   - If it succeeds, proceed to step 6
 6. **DO NOT generate convert_artifacts.py** - it already exists in scripts/ folder
 7. Run the converter (while venv is activated):
+   ```powershell
    .\venv\Scripts\python.exe scripts/convert_artifacts.py
+   ```
 8. Read conversion_results.md to display results
 9. If errors exist, display error details from error_log.md:
    - For each failed file show: filename, error type, suggested fix
@@ -262,24 +271,30 @@ This workflow defines the process for a Solution Architect to:
 
 All scripts run without administrator privileges from the repository root. Virtual environment is located in `/scripts/venv`.
 
-### Create Virtual Environment
+### Setup (run once)
 
 ```powershell
 cd scripts
 python -m venv venv
 .\venv\Scripts\Activate.ps1
+.\venv\Scripts\pip.exe install "markitdown[all]"
 ```
 
-### Install Dependencies
+### Verify Installation
 
 ```powershell
-.\venv\Scripts\pip.exe install markitdown
+.\venv\Scripts\python.exe -m markitdown --version
+```
+
+If this shows a version number, you're ready. If it fails, reinstall:
+
+```powershell
+.\venv\Scripts\pip.exe install "markitdown[all]"
 ```
 
 ### Run Document Converter
 
 ```powershell
-.\venv\Scripts\pip.exe install "markitdown[all]"
 .\venv\Scripts\python.exe scripts/convert_artifacts.py
 ```
 
@@ -289,8 +304,6 @@ python -m venv venv
 - Preserves folder structure from /documents/source to /documents/processed
 - Logs errors to error_log.md with filename, error type, suggested fix
 - Has 30-second timeout per file to prevent hangs
-- Preserve folder structure in `/documents/processed`
-- Generate `error_log.md` for any conversion failures
 
 ---
 

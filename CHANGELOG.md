@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3: Uses pre-built script instead of AI-generated code
 - Strict path enforcement: verify repo root first, abort if outside boundary
 - Guardrails: added explicit abort conditions for path violations
+- Phase 3: Added venv setup verification step before conversion
 - `/artifacts/discovered/` folder for unmapped content
 - `unmapped-content.md` template for tracking unmatched content
 - Content Mapping Strategy section in WORKFLOW.md
