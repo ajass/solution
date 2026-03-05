@@ -20,8 +20,7 @@ Review the required folder structure:
 │   └── discovered/
 ├── documents/
 │   ├── source/
-│   ├── processed/
-│   └── templates/
+│   └── processed/
 ├── scripts/
 ├── README.md
 ├── CHANGELOG.md
@@ -35,10 +34,10 @@ After user approval, DISCOVER repo root and CREATE all directories:
    $root = (Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName
    If not found in current directory or subdirectories, ask user to run from project root.
 2. Create all directories relative to discovered root:
-   New-Item -ItemType Directory -Force -Path "$root/artifacts/requirements", "$root/artifacts/architecture", "$root/artifacts/diagrams", "$root/artifacts/adr", "$root/artifacts/discovered", "$root/documents/source", "$root/documents/processed", "$root/documents/templates", "$root/scripts"
+   New-Item -ItemType Directory -Force -Path "$root/artifacts/requirements", "$root/artifacts/architecture", "$root/artifacts/diagrams", "$root/artifacts/adr", "$root/artifacts/discovered", "$root/documents/source", "$root/documents/processed", "$root/scripts"
 3. Verify workflow.md still exists in the root
 
-Confirm the folders were created and ask: "Ready to proceed to Phase 2?"
+Confirm the folders were created. **MILESTONE CHECKPOINT 1** - Ask: "Folders created. Ready for Phase 2 (source file collection)?"
 
 ## PHASE 2: SOURCE FILE COLLECTION
 After Phase 1 approval, inform the user:
@@ -56,7 +55,7 @@ After Phase 2 confirmation:
    - If not found, abort and ask user to run from project root
 2. Verify all required folders exist before proceeding (relative to discovered root):
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
-   - documents/source, documents/processed, documents/templates
+   - documents/source, documents/processed
    - scripts
    If any folder is missing, create it and warn the user.
 3. Ensure virtual environment is set up:
@@ -74,28 +73,29 @@ After Phase 2 confirmation:
    - **CRITICAL**: Verify all source files are within repo root - abort if any file path resolves outside the root directory
    - Preserve folder structure in /documents/processed
    - Convert all supported formats (docx, pptx, xlsx, pdf, images, markdown)
-   - Generate error_log.md for any failures
+   - Generate error_log.md for any failures with: filename, error type, suggested fix
    - Run without admin privileges
 6. Show the generated script to the user for approval
 7. Run the converter:
    .\venv\Scripts\python.exe convert_artifacts.py
 8. Display the results showing converted files and any errors
-9. If errors exist, show the error log and ask: "Some files failed to convert. Should I continue with mapping or address the errors first?"
+9. If errors exist, display error details:
+   - Show error_log.md content
+   - For each failed file show: filename, error type, suggested fix
+   - Ask: "Some files failed to convert. [Error summary]. Should I continue with mapping or address the errors first?"
 
-## PHASE 4: TEMPLATE CREATION
+## PHASE 4: TEMPLATE VERIFICATION
 After Phase 3 completion:
-Generate and create the template files from the definitions in WORKFLOW.md into the artifact directories:
-- Create /artifacts/requirements/ directory and add: business-context.md, stakeholder-needs.md, functional-requirements.md, non-functional-requirements.md, traceability-matrix.md
-- Create /artifacts/architecture/ directory and add: current-state.md, future-state.md, gap-analysis.md, roadmap.md, unmapped-content.md
-- Create /artifacts/diagrams/ directory and add: context-diagram.md, container-diagram.md, component-diagram.md, code-diagram.md
-- Create /artifacts/adr/ directory and add: adr-template.md
-- Create /artifacts/discovered/ directory (empty, for unmatched content during Phase 5)
+Templates were created in Phase 1. Verify they exist and are ready for population:
+- /artifacts/requirements/: business-context.md, stakeholder-needs.md, functional-requirements.md, non-functional-requirements.md, traceability-matrix.md
+- /artifacts/architecture/: current-state.md, future-state.md, gap-analysis.md, roadmap.md, unmapped-content.md
+- /artifacts/diagrams/: context-diagram.md, container-diagram.md, component-diagram.md, code-diagram.md
+- /artifacts/adr/: adr-template.md
+- /artifacts/discovered/: (empty - for unmatched content during Phase 5)
 
-Use the template definitions from the WORKFLOW.md Template Files section. Do NOT assume these files already exist - generate them fresh from the specifications.
+If any template is missing, create it from the template definitions in WORKFLOW.md.
 
-Note: Templates are created AFTER conversion so AI can analyze actual document content first. All templates will be created even if no relevant content is found in the converted files.
-
-Show the user the templates and ask: "Should I proceed with content mapping?"
+**MILESTONE CHECKPOINT 2** - Show template status and ask: "Conversion complete. Ready for Phase 5 (content mapping & completeness analysis)?"
 
 ## PHASE 5: CONTENT MAPPING & COMPLETENESS ANALYSIS
 After Phase 4 completion:
@@ -127,14 +127,15 @@ After Phase 4 completion:
    - List of unmapped/discovered content requiring manual review
    - Suggested next steps to complete the portfolio
 8. Display the completeness report to the user
-9. Ask: "I have analyzed template completeness. The report shows [summary]. Would you like to add more source files to address gaps? Say 'yes' to add more files or 'no' to proceed?"
+9. **MILESTONE CHECKPOINT 3** - Ask: "Completeness analysis complete. [Summary of results]. Would you like to add more source files to address gaps? Say 'yes' to add more files or 'no' to proceed?"
 
 ## PHASE 5 LOOP
 If user says "yes":
 - Ask user to add files to /documents/source
 - Wait for confirmation "I'm ready"
-- Re-run conversion (Phase 3)
-- Re-run completeness analysis (Phase 5)
+- Re-run conversion on new files only (Phase 3 - skip already converted files)
+- Re-run content mapping (this phase only, skip full Phase 3)
+- Re-display completeness report
 If user says "no":
 - Proceed to Phase 6
 
@@ -150,7 +151,8 @@ After Phase 5 completion:
 2. Update CHANGELOG.md:
    - Add entry under "Unreleased" or appropriate version
    - Document: new templates, converted documents, structural changes
-3. Show the user the proposed updates and ask: "Should I commit these documentation changes?"
+3. Show the user the proposed updates
+4. **MILESTONE CHECKPOINT 4** - Ask: "Documentation updates ready. Should I proceed with Phase 7 (summary)?"
 
 ## PHASE 7: SUMMARY
 After Phase 6 approval:
@@ -215,6 +217,7 @@ This workflow defines the process for a Solution Architect to:
 4. **Changelog Discipline**: A running `CHANGELOG.md` must be updated with every structural, script, or artifact change.
 5. **Path Discipline**: All paths must be relative. All instructions assume execution from the repository root.
 6. **PowerShell Only**: Use PowerShell commands, NOT bash.
+7. **Milestone Checkpoints**: Confirm at 4 key points: After Phase 1, After Phase 3/4, After Phase 5, After Phase 6
 
 ---
 
@@ -230,8 +233,7 @@ This workflow defines the process for a Solution Architect to:
 │   └── discovered/      (unmapped content from Phase 5)
 ├── documents/
 │   ├── source/
-│   ├── processed/
-│   └── templates/
+│   └── processed/
 ├── scripts/
 │   └── venv/          (created at runtime)
 ├── README.md

@@ -8,7 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Phase 5: Content-driven mapping (analyzes actual content, not filenames)
+- Folder structure fix: created artifacts/, documents/source, documents/processed, scripts/
+- Workflow streamlined: added 4 milestone checkpoints instead of 7 phase confirmations
+- Workflow updated: templates created in Phase 1, verified in Phase 4
+- Phase 3: detailed error reporting with filename, error type, suggested fix
+- Phase 5 loop: simplified to re-run only conversion + mapping (not full workflow)
+- Governance Rules: added milestone checkpoint requirement
 - `/artifacts/discovered/` folder for unmapped content
 - `unmapped-content.md` template for tracking unmatched content
 - Content Mapping Strategy section in WORKFLOW.md
