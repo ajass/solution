@@ -54,12 +54,12 @@ def get_output_path(input_path: Path, source_dir: Path, output_root: Path, repo_
 
 
 def convert_file(input_file: Path, output_file: Path, timeout: int = 30) -> tuple[bool, str]:
-    """Convert single file using markitdown CLI. Returns (success, error_message)"""
+    """Convert single file using markitdown via Python module. Returns (success, error_message)"""
     try:
         output_file.parent.mkdir(parents=True, exist_ok=True)
         
         result = subprocess.run(
-            ['markitdown', str(input_file), '-o', str(output_file)],
+            [sys.executable, '-m', 'markitdown', str(input_file), '-o', str(output_file)],
             capture_output=True,
             text=True,
             timeout=timeout,
@@ -74,7 +74,7 @@ def convert_file(input_file: Path, output_file: Path, timeout: int = 30) -> tupl
     except subprocess.TimeoutExpired:
         return False, f"Timeout ({timeout}s) - file may be corrupted or too large"
     except FileNotFoundError:
-        return False, "markitdown not installed - run: pip install markitdown[all]"
+        return False, "Python or markitdown not found - ensure venv is activated and markitdown[all] is installed"
     except Exception as e:
         return False, f"Error: {str(e)}"
 

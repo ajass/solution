@@ -55,16 +55,15 @@ After Phase 2 confirmation:
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
    - documents/source, documents/processed
    - scripts
-4. Set up Python (choose ONE method):
-   - **Option A** (venv): cd scripts; python -m venv venv; .\venv\Scripts\Activate.ps1
-   - **Option B** (system): Verify python is in PATH, skip venv creation
-5. Install markitdown:
-   - If using venv: .\venv\Scripts\pip.exe install "markitdown[all]"
-   - If using system: pip install "markitdown[all]"
+4. Set up Python with venv:
+   cd scripts
+   python -m venv venv
+   .\venv\Scripts\Activate.ps1
+5. Install markitdown in venv:
+   .\venv\Scripts\pip.exe install "markitdown[all]"
 6. **DO NOT generate convert_artifacts.py** - it already exists in scripts/ folder
-7. Run the converter:
-   - venv: .\venv\Scripts\python.exe scripts/convert_artifacts.py
-   - system: python scripts/convert_artifacts.py
+7. Run the converter (while venv is activated):
+   .\venv\Scripts\python.exe scripts/convert_artifacts.py
 8. Read conversion_results.md to display results
 9. If errors exist, display error details from error_log.md:
    - For each failed file show: filename, error type, suggested fix
