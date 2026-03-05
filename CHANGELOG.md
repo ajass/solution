@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Phase 3: detailed error reporting with filename, error type, suggested fix
 - Phase 5 loop: simplified to re-run only conversion + mapping (not full workflow)
 - Governance Rules: added milestone checkpoint requirement
+- Pre-built convert_artifacts.py script (eliminates AI code generation issues)
+
+### Changed
+- Phase 3: Uses pre-built script instead of AI-generated code
+- Strict path enforcement: verify repo root first, abort if outside boundary
+- Guardrails: added explicit abort conditions for path violations
 - `/artifacts/discovered/` folder for unmapped content
 - `unmapped-content.md` template for tracking unmatched content
 - Content Mapping Strategy section in WORKFLOW.md

@@ -49,38 +49,24 @@ Wait for the user to confirm they have placed files and are ready.
 
 ## PHASE 3: DOCUMENT CONVERSION
 After Phase 2 confirmation:
-1. DISCOVER repo root:
-   - Find workflow.md starting from current directory (walk up if not found)
-   - Use parent directory of workflow.md as repo root
-   - If not found, abort and ask user to run from project root
-2. Verify all required folders exist before proceeding (relative to discovered root):
+1. **CRITICAL - Verify repo root FIRST**: Run `(Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName` to find repo root. Store this as `$repoRoot`. ALL subsequent operations MUST use paths under this root.
+2. **STRICT PATH RULE**: NEVER create, modify, or reference any file outside `$repoRoot`. If any operation would touch a path outside `$repoRoot`, ABORT immediately and report error.
+3. Verify folders exist:
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
    - documents/source, documents/processed
    - scripts
-   If any folder is missing, create it and warn the user.
-3. Ensure virtual environment is set up:
-   cd scripts
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-4. Install dependencies:
-   .\venv\Scripts\pip.exe install "markitdown[all]"
-5. Generate the Python conversion script `scripts/convert_artifacts.py` with these requirements:
-   - Use pathlib for relative paths from repo root
-   - Resolve repo root dynamically (directory containing workflow.md)
-   - Use subprocess to call markitdown CLI: subprocess.run(['markitdown', str(input_file), '-o', str(output_file)])
-   - Install markitdown[all] BEFORE attempting any conversions
-   - Walk /documents/source recursively
-   - **CRITICAL**: Verify all source files are within repo root - abort if any file path resolves outside the root directory
-   - Preserve folder structure in /documents/processed
-   - Convert all supported formats (docx, pptx, xlsx, pdf, images, markdown)
-   - Generate error_log.md for any failures with: filename, error type, suggested fix
-   - Run without admin privileges
-6. Show the generated script to the user for approval
+4. Set up Python (choose ONE method):
+   - **Option A** (venv): cd scripts; python -m venv venv; .\venv\Scripts\Activate.ps1
+   - **Option B** (system): Verify python is in PATH, skip venv creation
+5. Install markitdown:
+   - If using venv: .\venv\Scripts\pip.exe install "markitdown[all]"
+   - If using system: pip install "markitdown[all]"
+6. **DO NOT generate convert_artifacts.py** - it already exists in scripts/ folder
 7. Run the converter:
-   .\venv\Scripts\python.exe convert_artifacts.py
-8. Display the results showing converted files and any errors
-9. If errors exist, display error details:
-   - Show error_log.md content
+   - venv: .\venv\Scripts\python.exe scripts/convert_artifacts.py
+   - system: python scripts/convert_artifacts.py
+8. Read conversion_results.md to display results
+9. If errors exist, display error details from error_log.md:
    - For each failed file show: filename, error type, suggested fix
    - Ask: "Some files failed to convert. [Error summary]. Should I continue with mapping or address the errors first?"
 
@@ -166,12 +152,41 @@ After Phase 6 approval:
    - How to manually complete remaining templates
    - How to add more artifacts later
 
-## GUARDRAILS
-- NEVER create files outside the repository root
-- ALWAYS use PowerShell commands, not bash
-- ALWAYS wait for user confirmation before proceeding to the next phase
-- If ANY error occurs, report it clearly and ask for guidance
-- NEVER overwrite existing user content without confirmation
+## GUARDRAILS - STRICT ENFORCEMENT
+```
+## CRITICAL RULES - ABORT IF VIOLATED
+
+### Path Safety (MUST NEVER VIOLATE)
+1. **ALWAYS verify repo root FIRST** at the start of each phase:
+   $repoRoot = (Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName
+2. **NEVER create, modify, or reference any file outside $repoRoot**
+3. **NEVER use absolute paths** - all paths must be relative to $repoRoot
+4. **ABORT immediately** if any operation would touch a path outside $repoRoot
+
+### Phase-Specific Rules
+- PHASE 1: Only create folders listed in folder structure - no extras
+- PHASE 3: DO NOT generate convert_artifacts.py - use pre-existing script
+- PHASE 3: Verify all source files are within repo before conversion
+- PHASE 5: Only write to /artifacts/* folders - never elsewhere
+
+### Error Handling
+- If ANY error occurs, STOP and report to user
+- Wait for user guidance before continuing
+- Log errors clearly with filename, error type, suggested fix
+
+### What NOT To Do
+- DO NOT create folders outside artifacts/, documents/, scripts/
+- DO NOT modify README.md, CHANGELOG.md, WORKFLOW.md, .gitignore
+- DO NOT run commands requiring admin privileges
+- DO NOT assume file locations - always verify with Get-ChildItem
+- DO NOT use hardcoded paths - always derive from $repoRoot
+
+### Abort Conditions (stop immediately if any occur)
+- Any file operation outside $repoRoot
+- Any command fails with access denied
+- Any path contains "..\" or "C:\" (outside repo)
+- Python/venv creation fails (try system Python instead)
+- markitdown install fails (report error, ask user to install manually)
 ```
 
 ---
@@ -266,14 +281,15 @@ python -m venv venv
 
 ```powershell
 .\venv\Scripts\pip.exe install "markitdown[all]"
-.\venv\Scripts\python.exe convert_artifacts.py
+.\venv\Scripts\python.exe scripts/convert_artifacts.py
 ```
 
-**Note:** The `scripts/convert_artifacts.py` script is generated dynamically by Copilot during Phase 3 of the workflow. The script will:
-- Use pathlib for relative paths from repo root
-- Use subprocess to call markitdown CLI: `subprocess.run(['markitdown', str(input_file), '-o', str(output_file)])`
-- Install `markitdown[all]` BEFORE attempting any conversions
-- Walk `/documents/source` recursively
+**Note:** The `scripts/convert_artifacts.py` script is PRE-BUILT and included in the repository. DO NOT generate or modify it. The script:
+- Uses pathlib with strict path resolution
+- Enforces repository boundary (aborts if file would be outside repo)
+- Preserves folder structure from /documents/source to /documents/processed
+- Logs errors to error_log.md with filename, error type, suggested fix
+- Has 30-second timeout per file to prevent hangs
 - Preserve folder structure in `/documents/processed`
 - Generate `error_log.md` for any conversion failures
 
