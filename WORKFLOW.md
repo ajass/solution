@@ -35,7 +35,11 @@ After user approval, DISCOVER repo root and CREATE all directories:
    If not found in current directory or subdirectories, ask user to run from project root.
 2. Create all directories relative to discovered root:
    New-Item -ItemType Directory -Force -Path "$root/artifacts/requirements", "$root/artifacts/architecture", "$root/artifacts/diagrams", "$root/artifacts/adr", "$root/artifacts/discovered", "$root/documents/source", "$root/documents/processed", "$root/scripts"
-3. **CREATE CONVERSION SCRIPT**: Write the following file as `$root/scripts/convert_artifacts.py`:
+3. **CREATE CONVERSION SCRIPT**: Run this command to extract and save the script:
+   ```powershell
+   $wf = Get-Content "$root\WORKFLOW.md" -Raw; $p1 = $wf.IndexOf('```python'); $p2 = $wf.IndexOf('```', $p1+8); $wf.Substring($p1+9, $p2-$p1-9) | Out-File "$root\scripts\convert_artifacts.py" -Encoding utf8
+   ```
+   Or manually copy the Python code block below to `$root/scripts/convert_artifacts.py`
 
 ```python
 #!/usr/bin/env python3
@@ -140,26 +144,27 @@ Wait for the user to confirm they have placed files and are ready.
 After Phase 2 confirmation:
 1. **CRITICAL - Verify repo root FIRST**: Run `(Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName` to find repo root. Store this as `$repoRoot`. ALL subsequent operations MUST use paths under this root.
 2. **STRICT PATH RULE**: NEVER create, modify, or reference any file outside `$repoRoot`. If any operation would touch a path outside `$repoRoot`, ABORT immediately and report error.
-3. Verify folders exist:
+3. **CRITICAL - Change to repo root FIRST**: Run `Set-Location $repoRoot` before any other operations. Verify with `Get-Location` shows `$repoRoot`.
+4. Verify folders exist:
    - artifacts/requirements, artifacts/architecture, artifacts/diagrams, artifacts/adr, artifacts/discovered
    - documents/source, documents/processed
    - scripts
-4. **SET UP VENV** (copy and run these commands):
+5. **SET UP VENV** (copy and run these commands - MUST be run from $repoRoot):
    ```powershell
-   cd scripts
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   .\venv\Scripts\pip.exe install "markitdown[all]"
+   Set-Location $repoRoot
+   python -m venv scripts/venv
+   .\scripts\venv\Scripts\Activate.ps1
+   .\scripts\venv\Scripts\pip.exe install "markitdown[all]"
    ```
-5. **TEST THE SETUP** (copy and run):
+6. **TEST THE SETUP** (copy and run):
    ```powershell
-   .\venv\Scripts\python.exe -m markitdown --version
+   .\scripts\venv\Scripts\python.exe -m markitdown --version
    ```
-   - If this fails, report: "markitdown installation failed. Try: .\venv\Scripts\pip.exe install markitdown[all]"
-   - If it succeeds, proceed to step 6
-6. Run the converter (while venv is activated):
+   - If this fails, report: "markitdown installation failed. Try: .\scripts\venv\Scripts\pip.exe install markitdown[all]"
+   - If it succeeds, proceed to step 7
+7. Run the converter (while venv is activated):
    ```powershell
-   .\venv\Scripts\python.exe scripts/convert_artifacts.py
+   .\scripts\venv\Scripts\python.exe scripts/convert_artifacts.py
    ```
 8. Read conversion_results.md to display results
 9. If errors exist, display error details from error_log.md:
@@ -261,7 +266,7 @@ After Phase 6 approval:
 
 ### Phase-Specific Rules
 - PHASE 1: Only create folders listed in folder structure - no extras
-- PHASE 3: DO NOT generate convert_artifacts.py - use pre-existing script
+- PHASE 3: DO NOT generate convert_artifacts.py - it was created in Phase 1
 - PHASE 3: Verify all source files are within repo before conversion
 - PHASE 5: Only write to /artifacts/* folders - never elsewhere
 
@@ -357,36 +362,38 @@ This workflow defines the process for a Solution Architect to:
 
 ## PowerShell Commands
 
-All scripts run without administrator privileges from the repository root. Virtual environment is located in `/scripts/venv`.
+All scripts run without administrator privileges from the repository root. Virtual environment is located in `scripts/venv`.
 
 ### Setup (run once)
 
 ```powershell
-cd scripts
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-.\venv\Scripts\pip.exe install "markitdown[all]"
+# MUST verify and change to repo root first
+$repoRoot = (Get-ChildItem -Recurse -Filter workflow.md | Select-Object -First 1).DirectoryName
+Set-Location $repoRoot
+python -m venv scripts/venv
+.\scripts\venv\Scripts\Activate.ps1
+.\scripts\venv\Scripts\pip.exe install "markitdown[all]"
 ```
 
 ### Verify Installation
 
 ```powershell
-.\venv\Scripts\python.exe -m markitdown --version
+.\scripts\venv\Scripts\python.exe -m markitdown --version
 ```
 
 If this shows a version number, you're ready. If it fails, reinstall:
 
 ```powershell
-.\venv\Scripts\pip.exe install "markitdown[all]"
+.\scripts\venv\Scripts\pip.exe install "markitdown[all]"
 ```
 
 ### Run Document Converter
 
 ```powershell
-.\venv\Scripts\python.exe scripts/convert_artifacts.py
+.\scripts\venv\Scripts\python.exe scripts/convert_artifacts.py
 ```
 
-**Note:** The `scripts/convert_artifacts.py` script is PRE-BUILT and included in the repository. DO NOT generate or modify it. The script:
+**Note:** The `scripts/convert_artifacts.py` script is created during Phase 1. The script:
 - Uses pathlib with strict path resolution
 - Enforces repository boundary (aborts if file would be outside repo)
 - Preserves folder structure from /documents/source to /documents/processed
