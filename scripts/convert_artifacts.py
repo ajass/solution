@@ -32,6 +32,23 @@ def find_repo_root() -> Path:
     raise RuntimeError("ERROR: workflow.md not found. Run from project root.")
 
 
+def check_markitdown() -> bool:
+    """Verify markitdown is available in the current Python environment"""
+    try:
+        result = subprocess.run(
+            [sys.executable, '-m', 'markitdown', '--version'],
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        if result.returncode == 0:
+            logger.info(f"markitdown available: {result.stdout.strip()}")
+            return True
+        return False
+    except Exception:
+        return False
+
+
 def is_within_repo(file_path: Path, repo_root: Path) -> bool:
     """Verify a path is within repository root (no path traversal)"""
     try:
@@ -62,8 +79,7 @@ def convert_file(input_file: Path, output_file: Path, timeout: int = 30) -> tupl
             [sys.executable, '-m', 'markitdown', str(input_file), '-o', str(output_file)],
             capture_output=True,
             text=True,
-            timeout=timeout,
-            cwd=input_file.parent.parent
+            timeout=timeout
         )
         
         if result.returncode == 0:
@@ -81,6 +97,16 @@ def convert_file(input_file: Path, output_file: Path, timeout: int = 30) -> tupl
 
 def main():
     logger.info("Starting document conversion...")
+    
+    # Pre-flight check: verify markitdown is available
+    if not check_markitdown():
+        logger.error("markitdown not found or not working.")
+        logger.error("Please run these commands first:")
+        logger.error("  cd scripts")
+        logger.error("  python -m venv venv")
+        logger.error("  .\\venv\\Scripts\\Activate.ps1")
+        logger.error("  .\\venv\\Scripts\\pip.exe install \"markitdown[all]\"")
+        sys.exit(1)
     
     try:
         repo_root = find_repo_root()
@@ -132,9 +158,9 @@ def main():
     
     error_content = [
         "# Conversion Error Log",
-        f"",
+        "",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        f"",
+        "",
         "| Filename | Error |",
         "|----------|-------|",
     ] + errors
@@ -143,13 +169,13 @@ def main():
     
     summary = [
         "# Conversion Results",
-        f"",
+        "",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-        f"",
+        "",
         f"Total files: {len(files_to_convert)}",
         f"Successful: {len(results)}",
         f"Failed: {len(errors)}",
-        f"",
+        "",
         "## Converted Files",
         "",
     ] + results + ["", "## Errors", f"See error_log.md ({len(errors)} failures)"]
