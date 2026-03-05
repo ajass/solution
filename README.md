@@ -4,8 +4,7 @@ Minimal workflow for Solution Architects to convert documents and manage archite
 
 ## What's Included
 
-- `WORKFLOW.md` - Full workflow definition (7 phases)
-- `scripts/convert_artifacts.py` - Document converter script
+- `WORKFLOW.md` - Full workflow definition (7 phases) with embedded converter script
 
 ## Quick Start
 
@@ -14,7 +13,7 @@ Minimal workflow for Solution Architects to convert documents and manage archite
 git clone <repo-url>
 cd <repo-name>
 
-# Phase 1 will create the folder structure automatically
+# Phase 1 creates folders and the converter script automatically
 
 # When ready for Phase 3, run:
 cd scripts
@@ -33,11 +32,4 @@ python -m venv venv
 
 ## Workflow
 
-See `WORKFLOW.md` for the full 7-phase workflow:
-1. File Structure Proposal (creates folders)
-2. Source File Collection
-3. Document Conversion
-4. Template Verification
-5. Content Mapping & Completeness Analysis
-6. Documentation Update
-7. Summary
+See `WORKFLOW.md` for the full 7-phase workflow. The converter script is embedded in WORKFLOW.md and created during Phase 1.

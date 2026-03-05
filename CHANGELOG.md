@@ -8,6 +8,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
-- Minimal repo: only WORKFLOW.md and scripts/convert_artifacts.py needed
-- Folder structure created at runtime (Phase 1)
-- Templates created at runtime (Phase 4)
+- Ultra-minimal repo: only WORKFLOW.md needed (script embedded and created at runtime)
+- Converter script embedded in WORKFLOW.md, created during Phase 1
