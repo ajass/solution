@@ -18,11 +18,3 @@ env/
 # OS
 .DS_Store
 Thumbs.db
-
-# Project specific - ignore contents but keep folders
-documents/source/*
-documents/processed/*
-!documents/source/.gitkeep
-!documents/processed/.gitkeep
-artifacts/discovered/*
-!artifacts/discovered/.gitkeep
